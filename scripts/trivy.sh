@@ -16,10 +16,8 @@ cd "$REPO_ROOT"
 
 echo "🔎 Running: trivy config --severity CRITICAL,HIGH --exit-code 1 --format sarif ."
 
-trivy config \
-    --severity CRITICAL,HIGH \
-    --exit-code 1 \
-    --format sarif \
-    .
+trivy config --exit-code 1 --severity CRITICAL,HIGH --format sarif . \
+  2> >(tee /dev/stderr) \
+  > trivy-iac.sarif
 
 echo "✅ Trivy IaC scan completed!"

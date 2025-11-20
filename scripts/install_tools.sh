@@ -19,11 +19,6 @@ if [[ "$OS" == "Linux" ]]; then
     fi
 fi
 
-if ! command_exists brew; then
-    echo "❌ Homebrew not found. Install it first: https://brew.sh/"
-    exit 1
-fi
-
 
 # ---------------------
 # Install Trivy
@@ -34,6 +29,10 @@ if command_exists trivy; then
 else
     echo "⚡ Installing Trivy..."
     if [[ "$OS" == "Darwin" ]]; then
+        if ! command_exists brew; then
+            echo "❌ Homebrew not found. Install it first: https://brew.sh/"
+            exit 1
+        fi
         brew install trivy
 
     elif [[ "$OS" == "Linux" ]]; then

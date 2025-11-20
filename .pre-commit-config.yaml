@@ -36,7 +36,9 @@ repos:
     hooks:
       - id: checkov
         name: Checkov Scan
-        entry: checkov -d . --config-file .checkov.yml
+        entry: checkov -d . -o sarif --config-file .checkov.yml \
+                2> >(tee /dev/stderr) \
+                > checkov.sarif
 
   # -------------------------
   # Pre-commit generic hooks
