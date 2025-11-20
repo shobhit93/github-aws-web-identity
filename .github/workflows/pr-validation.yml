@@ -33,15 +33,20 @@ jobs:
         with:
           extra_args: --all-files
 
+      - name: check sharif files
+        run: |
+          ls -latr
+          cat trivy-iac.sarif
+
       # 5️⃣ Codeql for Trivy IaC
       - name: codeql Trivy IaC
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-iac.sarif
 
 
       # 7️⃣ Codeql for Checkov
       - name: codeql Checkov
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: checkov.sarif
+          sarif_file: results.sarif
