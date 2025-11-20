@@ -1,23 +1,39 @@
 #!/bin/bash
 set -euo pipefail
 
-# Real repo root
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+# ----------------------------------------
+# Helper: check if Trivy is installed
+# ----------------------------------------
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
 
-echo "📁 Running Trivy IaC scan in repo: $REPO_ROOT"
-
-# Ensure trivy exists
-if ! command -v trivy >/dev/null 2>&1; then
-    echo "❌ Trivy is not installed!"
-    exit 1
+if ! command_exists trivy; then
+  echo "❌ Trivy is not installed. Install it via install_tools.sh first."
+  exit 1
 fi
 
-cd "$REPO_ROOT"
+echo "🧹 Clearing Trivy corrupted cache (known GH Actions issue)..."
+rm -rf ~/.cache/trivy
+mkdir -p ~/.cache/trivy
 
-echo "🔎 Running: trivy config --severity CRITICAL,HIGH --exit-code 1 --format sarif ."
+echo "🔄 Updating Trivy DB..."
+trivy --download-db-only || true
+echo "🔄 Updating Trivy Cloud Policies..."
+trivy --reset-policy || true
 
-trivy config --exit-code 1 --severity CRITICAL,HIGH --format sarif . \
-  2> >(tee /dev/stderr) \
-  > trivy-iac.sarif
+echo "----------------------------------------"
+echo "▶️ Running Trivy IaC Scan"
+echo "----------------------------------------"
 
-echo "✅ Trivy IaC scan completed!"
+# You can pass target dir as $1, or default to current dir
+TARGET_DIR="${1:-.}"
+
+trivy config \
+  --exit-code 1 \
+  --severity CRITICAL,HIGH \
+  --format sarif \
+  --output trivy-iac.sarif \
+  "$TARGET_DIR" \
+
+echo "✅ Trivy IaC SARIF written to trivy-iac.sarif"
