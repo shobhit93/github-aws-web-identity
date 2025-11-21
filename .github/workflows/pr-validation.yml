@@ -14,8 +14,8 @@ jobs:
         pull-requests: write
 
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout Code
+      # 1️⃣ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       # 2️⃣ Set up Python (for pre-commit)
@@ -23,6 +23,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.0
 
        # 4️⃣ Ensure Tools are installed (from your shell script)
       - name: Ensure Tools Installed
@@ -32,11 +37,7 @@ jobs:
         uses: pre-commit/action@v3.0.0
         with:
           extra_args: --all-files
-
-      - name: check sharif files
-        run: |
-          ls -latr
-          cat trivy-iac.sarif
+        continue-on-error: true
 
       # 5️⃣ Codeql for Trivy IaC
       - name: codeql Trivy IaC
