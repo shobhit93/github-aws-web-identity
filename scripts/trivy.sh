@@ -14,20 +14,30 @@ if ! command_exists trivy; then
 fi
 
 echo "🧹 Clearing Trivy corrupted cache (known GH Actions issue)..."
-rm -rf ~/.cache/trivy
-mkdir -p ~/.cache/trivy
+TRIVY_CACHE_DIR="${TRIVY_CACHE_DIR:-$HOME/.cache/trivy}"
+TRIVY_POLICY_PATH="${TRIVY_POLICY_PATH:-$TRIVY_CACHE_DIR/policy}"
 
-echo "🔄 Updating Trivy DB..."
-trivy --download-db-only || true
-echo "🔄 Updating Trivy Cloud Policies..."
-trivy --reset-policy || true
+echo "🧹 Clearing Trivy cache..."
+rm -rf "$TRIVY_CACHE_DIR"
+mkdir -p "$TRIVY_POLICY_PATH/policy/content/policies/cloud/policies/aws"
+
+export TRIVY_CACHE_DIR
+export TRIVY_POLICY_PATH
+
 
 echo "----------------------------------------"
 echo "▶️ Running Trivy IaC Scan"
 echo "----------------------------------------"
 
-# You can pass target dir as $1, or default to current dir
-TARGET_DIR="${1:-.}"
+# ----------------------------------------
+# Determine target directory
+# ----------------------------------------
+TARGET_DIR="$(git rev-parse --show-toplevel)"
+echo "Target dir: $TARGET_DIR"
+echo "📁 Scanning target: $TARGET_DIR"
+
+# Optional: show Terraform / YAML / IaC files found
+echo "🔍 IaC files found in repo"
 
 trivy config \
   --exit-code 1 \
