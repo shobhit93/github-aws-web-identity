@@ -1,0 +1,17 @@
+# Terraform variables for local use
+
+aws_region           = "us-east-1"
+github_repo          = "shobhit93/github-aws-web-identity"
+github_allowed_branches = [
+  "main",
+  "feature/*",
+  "feat/*",
+]
+
+tf_state_bucket      = "github-aws-web-identity-terraform-state"
+
+tags = {
+  Environment = "dev"
+  Owner       = "shobhit93"
+  Project     = "github-aws-web-identity"
+}
