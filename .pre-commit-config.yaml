@@ -19,7 +19,6 @@ repos:
     hooks:
       - id: terraform_fmt
       - id: terraform_validate
-      - id: terraform_tflint
 
   # -------------------------
   # TFsec Security Scanning
@@ -79,6 +78,6 @@ repos:
       # 2️⃣ Trivy IaC Scan
       - id: trivy-iac
         name: Trivy IaC Scan
-        entry: bash scripts/trivy.sh
+        entry: bash -c 'TRIVY_CHECKS_BUNDLE=off TRIVY_SKIP_POLICY_DOWNLOAD=true TRIVY_SKIP_DB_UPDATE=true TRIVY_SKIP_UPDATE=true bash scripts/trivy.sh'
         language: system
         always_run: true

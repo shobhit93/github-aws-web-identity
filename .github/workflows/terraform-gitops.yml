@@ -3,10 +3,6 @@ name: Terraform GitOps
 on:
   pull_request:
     branches: [ "main" ]
-  push:
-    branches:
-      - "feature/*"
-      - main
 
   workflow_dispatch:
     inputs:
@@ -19,11 +15,16 @@ on:
           - us-east-1
           - eu-west-1
 
-      
+
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write      # REQUIRED for manual-approval action
+      contents: read
+      actions: read
 
     env:
       TF_WORKING_DIR: ./terraform
@@ -113,8 +114,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: trstringer/manual-approval@v1.12.0
         with:
+          secret: ${{ github.TOKEN }}
           approvers: "${{ github.repository_owner }}"
           minimum-approvals: 1
+
           issue-title: "Approve Apply | Env: ${{ steps.vars.outputs.env }} | Region: ${{ steps.vars.outputs.region }} | Run ID: ${{ github.run_id }}"
           issue-body: |
             **Terraform Apply Requested**
@@ -128,8 +131,6 @@ jobs:
             **triggered actor:** ${{ github.triggering_actor }}
 
             Only **${{ github.repository_owner }}** can approve this deployment.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------
       # Terraform Apply (only on main)

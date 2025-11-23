@@ -1,49 +1,39 @@
 #!/bin/bash
 set -euo pipefail
 
-# ----------------------------------------
-# Helper: check if Trivy is installed
-# ----------------------------------------
-command_exists() {
-  command -v "$1" >/dev/null 2>&1
-}
-
-if ! command_exists trivy; then
-  echo "❌ Trivy is not installed. Install it via install_tools.sh first."
+if ! command -v trivy >/dev/null 2>&1; then
+  echo "❌ Trivy is not installed."
   exit 1
 fi
 
-echo "🧹 Clearing Trivy corrupted cache (known GH Actions issue)..."
-TRIVY_CACHE_DIR="${TRIVY_CACHE_DIR:-$HOME/.cache/trivy}"
-TRIVY_POLICY_PATH="${TRIVY_POLICY_PATH:-$TRIVY_CACHE_DIR/policy}"
+echo "🧹 Full Trivy cache reset (and REMOVE policy dir)..."
+export TRIVY_CACHE_DIR="${TRIVY_CACHE_DIR:-$HOME/.cache/trivy}"
 
-echo "🧹 Clearing Trivy cache..."
+# ❗ The important part: wipe the ENTIRE cache and DO NOT recreate policy folder
 rm -rf "$TRIVY_CACHE_DIR"
-mkdir -p "$TRIVY_POLICY_PATH/policy/content/policies/cloud/policies/aws"
 
-export TRIVY_CACHE_DIR
-export TRIVY_POLICY_PATH
+# 🔥 Disable ALL remote downloads (guaranteed)
+export TRIVY_SKIP_POLICY_DOWNLOAD=true
+export TRIVY_SKIP_DB_UPDATE=true
+export TRIVY_SKIP_UPDATE=true
+export TRIVY_CHECKS_BUNDLE=off
 
+# ❗ Make sure TRIVY_POLICY_PATH is NOT set at all
+unset TRIVY_POLICY_PATH
 
 echo "----------------------------------------"
-echo "▶️ Running Trivy IaC Scan"
+echo "▶️ Running Trivy IaC Scan (embedded-only)"
 echo "----------------------------------------"
 
-# ----------------------------------------
-# Determine target directory
-# ----------------------------------------
 TARGET_DIR="$(git rev-parse --show-toplevel)"
 echo "Target dir: $TARGET_DIR"
-echo "📁 Scanning target: $TARGET_DIR"
-
-# Optional: show Terraform / YAML / IaC files found
-echo "🔍 IaC files found in repo"
 
 trivy config \
   --exit-code 1 \
   --severity CRITICAL,HIGH \
   --format sarif \
   --output trivy-iac.sarif \
-  "$TARGET_DIR" \
+  "$TARGET_DIR"
+
 
 echo "✅ Trivy IaC SARIF written to trivy-iac.sarif"
