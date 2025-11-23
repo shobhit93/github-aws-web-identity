@@ -46,7 +46,7 @@ locals {
 # ---------------------------------------------------------
 resource "aws_iam_role" "github_actions" {
   name = "github-actions-terraform-role"
-  tags = var.tags  
+  tags = var.tags
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -75,7 +75,7 @@ resource "aws_iam_role" "github_actions" {
 resource "aws_iam_policy" "github_actions_policy" {
   name        = "github-actions-terraform-policy"
   description = "Policy for GitHub Actions via OIDC to deploy AWS resources"
-  tags = var.tags
+  tags        = var.tags
 
   policy = jsonencode({
     Version = "2012-10-17"
