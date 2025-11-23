@@ -8,13 +8,7 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket       = var.tf_state_bucket
-    key          = var.tf_state_key
-    region       = var.aws_region
-    encrypt      = true
-    use_lockfile = true
-  }
+  backend "s3" {}
 }
 
 provider "aws" {
@@ -34,6 +28,7 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = [
     "6938fd4d98bab03faadb97b34396831e3780aea1"
   ]
+  tags = var.tags
 }
 
 # ---------------------------------------------------------
@@ -51,6 +46,7 @@ locals {
 # ---------------------------------------------------------
 resource "aws_iam_role" "github_actions" {
   name = "github-actions-terraform-role"
+  tags = var.tags  
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -70,6 +66,7 @@ resource "aws_iam_role" "github_actions" {
       }
     ]
   })
+
 }
 
 # ---------------------------------------------------------
@@ -78,6 +75,7 @@ resource "aws_iam_role" "github_actions" {
 resource "aws_iam_policy" "github_actions_policy" {
   name        = "github-actions-terraform-policy"
   description = "Policy for GitHub Actions via OIDC to deploy AWS resources"
+  tags = var.tags
 
   policy = jsonencode({
     Version = "2012-10-17"
