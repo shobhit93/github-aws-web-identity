@@ -111,7 +111,7 @@ jobs:
       # ---------------------------
       - name: Manual Approval
         if: github.ref == 'refs/heads/main'
-        uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@v1.12.0
         with:
           approvers: "${{ github.repository_owner }}"
           minimum-approvals: 1
